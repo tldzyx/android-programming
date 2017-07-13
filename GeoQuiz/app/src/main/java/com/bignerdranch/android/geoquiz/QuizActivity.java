@@ -14,10 +14,13 @@ public class QuizActivity extends AppCompatActivity {
 
     private static final String TAG = QuizActivity.class.getSimpleName();
     private static final String KEY_CURRENT_INDEX = "current_index";
-    private static final String KEY_IS_CHEATER = "i_cheater";
+    private static final String KEY_IS_CHEATER = "is_cheater";
+    private static final String KEY_REMAIN_CHEATE_TIMES = "remain_cheate_times";
     private static final int REQUEST_CODE_CHEAT = 0;
 
     private TextView mQuestionTextView;
+    private Button mCheatButton;
+    private TextView mRemainCheateTimesTextView;
     private Toast mToast;
 
     private Question[] mQuestionBank = new Question[]{
@@ -29,7 +32,8 @@ public class QuizActivity extends AppCompatActivity {
     };
 
     private int mCurrentIndex = 0;
-    private boolean mIsCheater;
+    private boolean mIsCheater = false;
+    private byte mRemainCheateTimes = 3;
 
     private void updateQuestion() {
         Question question = mQuestionBank[mCurrentIndex];
@@ -67,6 +71,13 @@ public class QuizActivity extends AppCompatActivity {
         mToast.show();
     }
 
+    private void updateRemainCheateTimes(){
+        mRemainCheateTimesTextView.setText(String.format("You remain %d times to cheat.", mRemainCheateTimes));
+        if(mRemainCheateTimes <= 0) {
+            mCheatButton.setEnabled(false);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,6 +86,7 @@ public class QuizActivity extends AppCompatActivity {
         if(savedInstanceState != null) {
             mCurrentIndex = savedInstanceState.getInt(KEY_CURRENT_INDEX, 0);
             mIsCheater = savedInstanceState.getBoolean(KEY_IS_CHEATER, false);
+            mRemainCheateTimes = savedInstanceState.getByte(KEY_REMAIN_CHEATE_TIMES, (byte)0);
         }
 
         setContentView(R.layout.activity_quiz);
@@ -97,8 +109,8 @@ public class QuizActivity extends AppCompatActivity {
             }
         });
 
-        Button cheatButton = (Button) findViewById(R.id.cheat_button);
-        cheatButton.setOnClickListener(new View.OnClickListener() {
+        mCheatButton = (Button) findViewById(R.id.cheat_button);
+        mCheatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
@@ -106,6 +118,9 @@ public class QuizActivity extends AppCompatActivity {
                 startActivityForResult(intent, REQUEST_CODE_CHEAT);
             }
         });
+
+        mRemainCheateTimesTextView = (TextView)findViewById(R.id.remain_cheate_times_text_view);
+        updateRemainCheateTimes();
 
         Button prevButton = (Button) findViewById(R.id.prev_button);
         prevButton.setOnClickListener(new View.OnClickListener() {
@@ -141,6 +156,9 @@ public class QuizActivity extends AppCompatActivity {
                     case RESULT_OK:{
                         if(data != null){
                             mIsCheater = CheatActivity.wasAnswerShown(data);
+
+                            --mRemainCheateTimes;
+                            updateRemainCheateTimes();
                         }
                     }break;
                 }
@@ -172,6 +190,7 @@ public class QuizActivity extends AppCompatActivity {
         Log.d(TAG, "onSaveInstanceState(Bundle) called");
         outState.putInt(KEY_CURRENT_INDEX, mCurrentIndex);
         outState.putBoolean(KEY_IS_CHEATER, mIsCheater);
+        outState.putByte(KEY_REMAIN_CHEATE_TIMES, mRemainCheateTimes);
     }
 
     @Override
