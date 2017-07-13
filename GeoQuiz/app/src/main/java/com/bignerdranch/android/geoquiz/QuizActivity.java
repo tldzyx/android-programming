@@ -57,6 +57,7 @@ public class QuizActivity extends AppCompatActivity {
         }
 
         Toast toast = Toast.makeText(this, messageResId, Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.TOP, 0, 15);
 
         if(mToast != null)
         {
@@ -103,6 +104,16 @@ public class QuizActivity extends AppCompatActivity {
                 boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
                 Intent intent = CheatActivity.newIntent(QuizActivity.this, answerIsTrue);
                 startActivityForResult(intent, REQUEST_CODE_CHEAT);
+            }
+        });
+
+        Button prevButton = (Button) findViewById(R.id.prev_button);
+        prevButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mCurrentIndex = (mCurrentIndex + mQuestionBank.length - 1) % mQuestionBank.length;
+                mIsCheater = false;
+                updateQuestion();
             }
         });
 
