@@ -1,6 +1,8 @@
 package com.bignerdranch.android.criminalintent;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
